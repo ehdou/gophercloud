@@ -143,3 +143,17 @@ func TestFilteredList(t *testing.T) {
 
 	th.CheckDeepEquals(t, expected, actual)
 }
+
+// Verifies that it is possible to get a share network
+func TestGet(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	MockGetResponse(t)
+
+	n, err := sharenetworks.Get(client.ServiceClient(), "7f950b52-6141-4a08-bbb5-bb7ffa3ea5fd").Extract()
+	th.AssertNoErr(t, err)
+
+	th.AssertEquals(t, n.Name, "net_my1")
+	th.AssertEquals(t, n.ID, "7f950b52-6141-4a08-bbb5-bb7ffa3ea5fd")
+}

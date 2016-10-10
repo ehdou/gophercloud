@@ -110,3 +110,10 @@ func List(client *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pa
 		return ShareNetworkPage{pagination.SinglePageBase(r)}
 	})
 }
+
+// Get retrieves the ShareNetwork with the provided ID. To extract the ShareNetwork
+// object from the response, call the Extract method on the GetResult.
+func Get(client *gophercloud.ServiceClient, id string) (r GetResult) {
+	_, r.Err = client.Get(getURL(client, id), &r.Body, nil)
+	return
+}
