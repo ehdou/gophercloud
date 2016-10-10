@@ -157,3 +157,16 @@ func TestGet(t *testing.T) {
 	th.AssertEquals(t, n.Name, "net_my1")
 	th.AssertEquals(t, n.ID, "7f950b52-6141-4a08-bbb5-bb7ffa3ea5fd")
 }
+
+// Verifies that it is possible to update a share network
+func TestUpdate(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	MockUpdateResponse(t)
+
+	options := sharenetworks.UpdateOpts{Name: "net_my2"}
+	v, err := sharenetworks.Update(client.ServiceClient(), "713df749-aac0-4a54-af52-10f6c991e80c", options).Extract()
+	th.AssertNoErr(t, err)
+	th.CheckEquals(t, "net_my2", v.Name)
+}
