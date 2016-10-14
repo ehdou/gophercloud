@@ -165,3 +165,16 @@ func TestGet(t *testing.T) {
 	th.AssertEquals(t, n.Name, "SecServ1")
 	th.AssertEquals(t, n.ID, "securityServiceID")
 }
+
+// Verifies that it is possible to update a security service
+func TestUpdate(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	MockUpdateResponse(t)
+
+	options := securityservices.UpdateOpts{Name: "SecServ2"}
+	v, err := securityservices.Update(client.ServiceClient(), "securityServiceID", options).Extract()
+	th.AssertNoErr(t, err)
+	th.CheckEquals(t, "SecServ2", v.Name)
+}
