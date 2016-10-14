@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/gophercloud/gophercloud/acceptance/clients"
+	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/securityservices"
 	"github.com/gophercloud/gophercloud/openstack/sharedfilesystems/v2/sharenetworks"
 )
 
@@ -134,4 +135,58 @@ func TestShareNetworkListFiltering(t *testing.T) {
 		}
 		PrintShareNetwork(t, &listedShareNetwork)
 	}
+}
+
+// The test creates a security service and adds it to a share network. It then
+// retrieve the security service and verifies that it is bound to the share network
+func TestShareNetworkAddSecurityService(t *testing.T) {
+	client, err := clients.NewSharedFileSystemV2Client()
+	if err != nil {
+		t.Fatalf("Unable to create a shared file system client: %v", err)
+	}
+
+	securityService, err := CreateSecurityService(t, client)
+	if err != nil {
+		t.Fatalf("Unable to create security service: %v", err)
+	}
+	defer DeleteSecurityService(t, client, securityService)
+
+	shareNetwork, err := CreateShareNetwork(t, client)
+	if err != nil {
+		t.Fatalf("Unable to create share network: %v", err)
+	}
+	defer DeleteShareNetwork(t, client, shareNetwork)
+
+	options := sharenetworks.AddSecurityServiceOpts{
+		SecurityServiceID: securityService.ID,
+	}
+
+	_, err = sharenetworks.AddSecurityService(client, shareNetwork.ID, options).Extract()
+	if err != nil {
+		t.Errorf("Unable to add security service: %v", err)
+	}
+
+	listOptions := securityservices.ListOpts{
+		ID: securityService.ID,
+	}
+
+	allPages, err := securityservices.List(client, listOptions).AllPages()
+	if err != nil {
+		t.Fatalf("Unable to retrieve security services: %v", err)
+	}
+
+	allSecurityServices, err := securityservices.ExtractSecurityServices(allPages)
+	if err != nil {
+		t.Fatalf("Unable to extract security services: %v", err)
+	}
+
+	for _, securityService := range allSecurityServices {
+		PrintSecurityService(t, &securityService)
+		if len(securityService.ShareNetworks) == 0 ||
+			securityService.ShareNetworks[0] != shareNetwork.ID {
+			t.Fatalf("Security service was expected to be bound to share network: %s", shareNetwork.ID)
+		}
+	}
+
+	PrintShareNetwork(t, shareNetwork)
 }
