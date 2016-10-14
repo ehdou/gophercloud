@@ -182,3 +182,15 @@ func TestAddSecurityService(t *testing.T) {
 	_, err := sharenetworks.AddSecurityService(client.ServiceClient(), "shareNetworkID", options).Extract()
 	th.AssertNoErr(t, err)
 }
+
+// Verifies that it is possible to remove a security service from a share network
+func TestRemoveSecurityService(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	MockRemoveSecurityServiceResponse(t)
+
+	options := sharenetworks.RemoveSecurityServiceOpts{SecurityServiceID: "securityServiceID"}
+	_, err := sharenetworks.RemoveSecurityService(client.ServiceClient(), "shareNetworkID", options).Extract()
+	th.AssertNoErr(t, err)
+}
