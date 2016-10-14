@@ -138,8 +138,10 @@ func TestShareNetworkListFiltering(t *testing.T) {
 }
 
 // The test creates a security service and adds it to a share network. It then
-// retrieve the security service and verifies that it is bound to the share network
-func TestShareNetworkAddSecurityService(t *testing.T) {
+// retrieve the security service and verifies that it is bound to the share network.
+// The test then removes the security service from the share network and verifies
+// that it is not bound anymore
+func TestShareNetworkAddRemoveSecurityService(t *testing.T) {
 	client, err := clients.NewSharedFileSystemV2Client()
 	if err != nil {
 		t.Fatalf("Unable to create a shared file system client: %v", err)
@@ -185,6 +187,34 @@ func TestShareNetworkAddSecurityService(t *testing.T) {
 		if len(securityService.ShareNetworks) == 0 ||
 			securityService.ShareNetworks[0] != shareNetwork.ID {
 			t.Fatalf("Security service was expected to be bound to share network: %s", shareNetwork.ID)
+		}
+	}
+
+	removeOptions := sharenetworks.RemoveSecurityServiceOpts{
+		SecurityServiceID: securityService.ID,
+	}
+
+	_, err = sharenetworks.RemoveSecurityService(client, shareNetwork.ID, removeOptions).Extract()
+	if err != nil {
+		t.Errorf("Unable to remove security service: %v", err)
+	}
+
+	allPages, err = securityservices.List(client, listOptions).AllPages()
+	if err != nil {
+		t.Fatalf("Unable to retrieve security services: %v", err)
+	}
+
+	allSecurityServices, err = securityservices.ExtractSecurityServices(allPages)
+	if err != nil {
+		t.Fatalf("Unable to extract security services: %v", err)
+	}
+
+	for _, securityService := range allSecurityServices {
+		PrintSecurityService(t, &securityService)
+		for _, shareNetworkID := range securityService.ShareNetworks {
+			if shareNetworkID == shareNetwork.ID {
+				t.Fatalf("Security service was not expected to be bound to share network: %s", shareNetwork.ID)
+			}
 		}
 	}
 
