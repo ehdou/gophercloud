@@ -146,3 +146,13 @@ func TestSetExtraSpecs(t *testing.T) {
 
 	th.AssertEquals(t, es.Specs["my_key"], "my_value")
 }
+
+// Verifies that an extra specification can be unset for a share type
+func TestUnsetExtraSpecs(t *testing.T) {
+	th.SetupHTTP()
+	defer th.TeardownHTTP()
+
+	MockUnsetExtraSpecsResponse(t)
+	res := sharetypes.UnsetExtraSpecs(client.ServiceClient(), "shareTypeID", "my_key")
+	th.AssertNoErr(t, res.Err)
+}
