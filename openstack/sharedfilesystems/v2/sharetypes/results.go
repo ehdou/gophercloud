@@ -140,3 +140,8 @@ func (r shareTypeAccessResult) Extract() ([]ShareTypeAccess, error) {
 type AddAccessResult struct {
 	gophercloud.ErrResult
 }
+
+// RemoveAccessResult contains the response body and error from a Remove Access request.
+type RemoveAccessResult struct {
+	gophercloud.ErrResult
+}
