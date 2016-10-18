@@ -24,7 +24,7 @@ func CreateShareType(t *testing.T, client *gophercloud.ServiceClient) (*sharetyp
 
 	createOpts := sharetypes.CreateOpts{
 		Name: shareTypeName,
-		OSShareTypeAccessIsPublic: true,
+		OSShareTypeAccessIsPublic: false,
 		ExtraSpecs:                extraSpecsOps,
 	}
 
